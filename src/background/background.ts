@@ -1,0 +1,1 @@
+console.log("Quipped background script running");
