@@ -1,33 +1,21 @@
 {
-    "manifest_version": 3,
-    "name": "Quipped",
-    "version": "0.1.0",
-    "description": "Type shortcodes and emojis anywhere on the web.",
-    "permissions": [
-        "storage"
-    ],
-    "background": {
-        "service_worker": "background.js"
-    },
-    "content_scripts": [
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "content.js"
-            ],
-            "run_at": "document_idle"
-        }
-    ],
-    "options_ui": {
-        "page": "options.html",
-        "open_in_tab": true
-    },
-    "browser_specific_settings": {
-        "gecko": {
-            "id": "quipped@yourdomain.dev",
-            "strict_min_version": "109.0"
-        }
+  "manifest_version": 3,
+  "name": "Quipped",
+  "version": "0.1.0",
+  "description": "Type shortcodes and expand them anywhere on the web.",
+  "permissions": ["storage"],
+  "action": {
+    "default_title": "Quipped",
+    "default_popup": "options.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
+  ]
 }
