@@ -7,3 +7,5 @@ Quipped is an extension that works on both Firefox and Chrome. It allows you to 
 It also has a global emoji bar.
 
 The main feature is that it automatically styles itself after the site's it's on, so that it looks completely in tune with the site's styles and doesn't look out of place!
+
+Quipped's mascot is the cutest thing ever.
