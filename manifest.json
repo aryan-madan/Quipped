@@ -3,18 +3,30 @@
   "name": "Quipped",
   "version": "0.1.0",
   "description": "Type shortcodes and expand them anywhere on the web.",
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
+  "icons": {
+    "128": "icons/icon128.png"
+  },
   "action": {
     "default_title": "Quipped",
-    "default_popup": "options.html"
+    "default_popup": "options.html",
+    "default_icon": {
+      "128": "icons/icon128.png"
+    }
   },
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ]

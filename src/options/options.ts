@@ -8,18 +8,40 @@ const backdrop = document.getElementById("backdrop") as HTMLDivElement;
 const newpill = document.getElementById("newpill") as HTMLDivElement;
 const newform = document.getElementById("newform") as HTMLDivElement;
 const nfCode = document.getElementById("nf-code") as HTMLInputElement;
-const nfExp = document.getElementById("nf-exp") as HTMLInputElement;
+const nfExp = document.getElementById("nf-exp") as HTMLDivElement;
 const nfCancel = document.getElementById("nf-cancel") as HTMLButtonElement;
 const nfAdd = document.getElementById("nf-add") as HTMLButtonElement;
+const nfBold = document.getElementById("nf-bold") as HTMLButtonElement | null;
+const nfItalic = document.getElementById("nf-italic") as HTMLButtonElement | null;
+const nfUnderline = document.getElementById("nf-underline") as HTMLButtonElement | null;
 const settingspop = document.getElementById("settingspop") as HTMLDivElement | null;
 const spmodselect = document.getElementById("spmodselect") as HTMLDivElement | null;
 const sppreviewmod = document.getElementById("sppreviewmod") as HTMLSpanElement | null;
 const spsave = document.getElementById("spsave") as HTMLButtonElement | null;
-nfExp.style.textAlign = "center";
 let quips: Record<string, string> = {};
 let dirty = false;
 let modifier: Modifier = "alt";
 let pendingModifier: Modifier = "alt";
+function applyFormat(cmd: string) {
+  document.execCommand(cmd, false);
+  updateFormatButtons();
+}
+function updateFormatButtons() {
+  if (!nfBold && !nfItalic && !nfUnderline) return;
+  const active = document.activeElement === nfExp;
+  nfBold?.classList.toggle("active", active && document.queryCommandState("bold"));
+  nfItalic?.classList.toggle("active", active && document.queryCommandState("italic"));
+  nfUnderline?.classList.toggle("active", active && document.queryCommandState("underline"));
+}
+function handleFormatKeys(e: KeyboardEvent, onSubmit?: () => void) {
+  const mod = e.metaKey || e.ctrlKey;
+  if (!mod) return;
+  const key = e.key.toLowerCase();
+  if (key === "b") { e.preventDefault(); applyFormat("bold"); }
+  else if (key === "i") { e.preventDefault(); applyFormat("italic"); }
+  else if (key === "u") { e.preventDefault(); applyFormat("underline"); }
+  else if (e.key === "Enter" && onSubmit) { e.preventDefault(); onSubmit(); }
+}
 async function load() {
   const stored = await browser.storage.sync.get(["quips", "modifier"]);
   quips = (stored.quips as Record<string, string>) || { "!n": "Your Name Here", "!e": "you@example.com" };
@@ -74,6 +96,8 @@ function render() {
   codes.forEach(code => {
     const row = document.createElement("div");
     row.className = "quip-row";
+    const top = document.createElement("div");
+    top.className = "qr-top";
     const chip = document.createElement("input");
     chip.className = "code-chip";
     chip.value = code;
@@ -96,17 +120,21 @@ function render() {
       if (e.key === "Enter") { chip.blur(); e.preventDefault(); }
       if (e.key === "Escape") { chip.value = code; chip.blur(); }
     });
-    const input = document.createElement("input");
-    input.className = "exp-input";
-    input.value = quips[code];
-    input.addEventListener("input", () => { quips[code] = input.value; setDirty(true); });
     const del = document.createElement("button");
     del.className = "del-btn";
     del.innerHTML = `<svg width="9" height="9" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
     del.addEventListener("click", () => { delete quips[code]; setDirty(true); render(); });
-    row.appendChild(chip);
-    row.appendChild(input);
-    row.appendChild(del);
+    top.appendChild(chip);
+    top.appendChild(del);
+    const expDiv = document.createElement("div");
+    expDiv.className = "exp-input";
+    expDiv.contentEditable = "true";
+    expDiv.dataset.placeholder = "Expansion text";
+    expDiv.innerHTML = quips[code];
+    expDiv.addEventListener("input", () => { quips[code] = expDiv.innerHTML; setDirty(true); });
+    expDiv.addEventListener("keydown", e => handleFormatKeys(e));
+    row.appendChild(top);
+    row.appendChild(expDiv);
     listEl.appendChild(row);
   });
 }
@@ -145,18 +173,27 @@ backdrop.addEventListener("click", closePop);
 nfCancel.addEventListener("click", closePop);
 function addQuip() {
   const code = nfCode.value.trim();
-  const exp = nfExp.value.trim();
-  if (!code || !exp || !code.startsWith("!")) return;
-  quips[code] = exp;
+  const expText = nfExp.innerText.trim();
+  const expHtml = nfExp.innerHTML.trim();
+  if (!code || !expText || !code.startsWith("!")) return;
+  quips[code] = expHtml;
   setDirty(true);
   render();
   nfCode.value = "";
-  nfExp.value = "";
+  nfExp.innerHTML = "";
   closePop();
 }
 nfAdd.addEventListener("click", addQuip);
-nfExp.addEventListener("keydown", e => { if (e.key === "Enter") addQuip(); });
+nfExp.addEventListener("keydown", e => handleFormatKeys(e, addQuip));
+nfExp.addEventListener("input", updateFormatButtons);
+nfExp.addEventListener("focus", updateFormatButtons);
+nfExp.addEventListener("blur", updateFormatButtons);
 nfCode.addEventListener("keydown", e => { if (e.key === "Enter") nfExp.focus(); });
+[nfBold, nfItalic, nfUnderline].forEach(btn => btn?.addEventListener("mousedown", e => e.preventDefault()));
+nfBold?.addEventListener("click", () => { nfExp.focus(); applyFormat("bold"); });
+nfItalic?.addEventListener("click", () => { nfExp.focus(); applyFormat("italic"); });
+nfUnderline?.addEventListener("click", () => { nfExp.focus(); applyFormat("underline"); });
+document.addEventListener("selectionchange", updateFormatButtons);
 gearbtn?.addEventListener("click", e => {
   e.stopPropagation();
   openPop(activePop === "settings" ? "none" : "settings");

@@ -54,6 +54,28 @@
       z-index: 1;
     }
 
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .logo {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      display: block;
+      background-color: rgba(255, 255, 255, 0.7);
+      -webkit-mask-image: url('icons/logo.svg');
+      mask-image: url('icons/logo.svg');
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
+    }
+
     .wordmark {
       font-size: 12.5px;
       font-weight: 650;
@@ -124,11 +146,16 @@
 
     .quip-row {
       display: flex;
-      align-items: center;
-      padding: 0 11px 0 13px;
-      height: 48px;
+      flex-direction: column;
+      padding: 12px 11px 12px 13px;
+      gap: 6px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.045);
-      gap: 9px;
+    }
+
+    .qr-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .quip-row:first-child {
@@ -150,6 +177,7 @@
       outline: none;
       letter-spacing: 0.04em;
       transition: border-color 0.15s, color 0.15s, background 0.15s;
+      flex-shrink: 0;
     }
 
     .code-chip:focus {
@@ -159,14 +187,29 @@
     }
 
     .exp-input {
-      flex: 1;
-      min-width: 0;
+      width: 100%;
       background: transparent;
       border: none;
       color: rgba(255, 255, 255, 0.78);
       font-size: 12.5px;
       font-family: inherit;
       outline: none;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.45;
+      padding: 0;
+      text-align: left;
+    }
+
+    .exp-input:empty:before {
+      content: attr(data-placeholder);
+      color: rgba(255, 255, 255, 0.18);
+      pointer-events: none;
+    }
+
+    .exp-input b,
+    .exp-input strong {
+      font-weight: 700;
     }
 
     .del-btn {
@@ -260,21 +303,6 @@
       pointer-events: none;
     }
 
-    .tkey-light {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.07);
-      border: 0.5px solid rgba(0, 0, 0, 0.18);
-      box-shadow: 0 1.5px 0 rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 11px;
-      color: rgba(0, 0, 0, 0.52);
-      line-height: 1.4;
-      font-family: -apple-system, system-ui, sans-serif;
-    }
-
     .npill-icon {
       color: rgba(0, 0, 0, 0.4);
       display: flex;
@@ -286,21 +314,6 @@
       font-weight: 600;
       color: rgba(0, 0, 0, 0.75);
       letter-spacing: -0.1px;
-    }
-
-    .npill-tkey {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.07);
-      border: 0.5px solid rgba(0, 0, 0, 0.18);
-      box-shadow: 0 1.5px 0 rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 11px;
-      color: rgba(0, 0, 0, 0.52);
-      line-height: 1.4;
-      font-family: -apple-system, system-ui, sans-serif;
     }
 
     #newform {
@@ -363,16 +376,54 @@
       letter-spacing: 0.03em;
     }
 
+    #nf-exp {
+      min-height: 56px;
+      max-height: 140px;
+      overflow-y: auto;
+      padding: 9px 11px;
+    }
+
+    #nf-exp:empty:before {
+      color: rgba(0, 0, 0, 0.22);
+    }
+
     .nf-row {
       display: flex;
       gap: 6px;
       align-items: center;
+      justify-content: space-between;
     }
 
-    .nf-hint {
-      flex: 1;
+    .nf-format {
+      display: flex;
+      gap: 4px;
+    }
+
+    .nf-fbtn {
+      width: 24px;
+      height: 24px;
+      background: rgba(0, 0, 0, 0.04);
+      border: 0.5px solid rgba(0, 0, 0, 0.09);
+      border-radius: 6px;
+      color: rgba(0, 0, 0, 0.45);
       font-size: 11px;
-      color: rgba(0, 0, 0, 0.38);
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.1s, color 0.1s, border-color 0.1s;
+    }
+
+    .nf-fbtn:hover {
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .nf-fbtn.active {
+      background: rgba(0, 0, 0, 0.14);
+      border-color: rgba(0, 0, 0, 0.2);
+      color: rgba(0, 0, 0, 0.85);
     }
 
     .nf-actions {
@@ -564,7 +615,10 @@
     <div id="backdrop"></div>
 
     <div class="header">
-      <span class="wordmark">Your Quips</span>
+      <div class="brand">
+        <div class="logo" role="img" aria-label="Quipped logo"></div>
+        <span class="wordmark">Your Quips</span>
+      </div>
       <div class="header-actions">
         <button class="save-btn" id="savebtn">Save</button>
         <button class="gear-btn" id="gearbtn">
@@ -617,9 +671,13 @@
 
     <div id="newform">
       <input class="nf-input" id="nf-code" placeholder="!shortcode" autocomplete="off" spellcheck="false" />
-      <input class="nf-input" id="nf-exp" placeholder="Expansion text" autocomplete="off" />
+      <div class="nf-input exp-input" id="nf-exp" contenteditable="true" data-placeholder="Expansion text"></div>
       <div class="nf-row">
-        <span class="nf-hint"><span class="tkey-light" style="font-size:10.5px">↩</span> to add</span>
+        <div class="nf-format">
+          <button class="nf-fbtn" id="nf-bold" type="button"><b>B</b></button>
+          <button class="nf-fbtn" id="nf-italic" type="button"><i>I</i></button>
+          <button class="nf-fbtn" id="nf-underline" type="button"><u>U</u></button>
+        </div>
         <div class="nf-actions">
           <button class="nf-cancel" id="nf-cancel">Cancel</button>
           <button class="nf-add" id="nf-add">Add</button>
