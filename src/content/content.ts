@@ -17,6 +17,75 @@ const emojiEntries: EmojiEntry[] = Object.entries(
   emojiList as unknown as Record<string, EmojiMeta>
 ).map(([emoji, meta]) => ({ ...meta, emoji }));
 
+function tokenize(s: string): string[] {
+  return s.toLowerCase().split(/[\s_]+/).filter(Boolean);
+}
+
+function wordVariants(token: string): string[] {
+  const variants = new Set<string>([token]);
+  if (token.endsWith("ing") && token.length > 4) {
+    const base = token.slice(0, -3);
+    variants.add(base);
+    variants.add(base + "e");
+    if (base.length >= 2 && base[base.length - 1] === base[base.length - 2]) {
+      variants.add(base.slice(0, -1));
+    }
+  }
+  if (token.endsWith("ed") && token.length > 3) {
+    const base = token.slice(0, -2);
+    variants.add(base);
+    variants.add(base + "e");
+    if (base.length >= 2 && base[base.length - 1] === base[base.length - 2]) {
+      variants.add(base.slice(0, -1));
+    }
+  }
+  if (token.endsWith("es") && token.length > 3) {
+    variants.add(token.slice(0, -2));
+  } else if (token.endsWith("s") && token.length > 3) {
+    variants.add(token.slice(0, -1));
+  }
+  return Array.from(variants);
+}
+
+interface EmojiSearchEntry {
+  entry: EmojiEntry;
+  name: string;
+  slug: string;
+  tokens: string[];
+  variants: string[];
+}
+
+const searchIndex: EmojiSearchEntry[] = emojiEntries.map((entry) => {
+  const name = entry.name.toLowerCase();
+  const slug = entry.slug.toLowerCase();
+  const tokens = Array.from(new Set([...tokenize(name), ...tokenize(slug)]));
+  const variants = Array.from(new Set(tokens.flatMap(wordVariants)));
+  return { entry, name, slug, tokens, variants };
+});
+
+function matchScore(item: EmojiSearchEntry, q: string, qSlug: string): number | null {
+  if (item.name === q || item.slug === qSlug) return 0;
+  if (item.name.startsWith(q) || item.slug.startsWith(qSlug)) return 1;
+  for (const token of item.tokens) {
+    if (token === q) return 1;
+  }
+  for (const v of item.variants) {
+    if (v === q) return 2;
+  }
+  if (q.length >= 3) {
+    for (const v of item.variants) {
+      if (v.startsWith(q)) return 3;
+    }
+  }
+  if (item.name.includes(q) || item.slug.includes(qSlug)) return 4;
+  if (q.length >= 3) {
+    for (const v of item.variants) {
+      if (v.includes(q)) return 5;
+    }
+  }
+  return null;
+}
+
 const ACTIVE_FLAG = "__quipCompanionActive__";
 if ((window as unknown as Record<string, boolean>)[ACTIVE_FLAG]) {
 } else {
@@ -194,29 +263,19 @@ function initQuipCompanion() {
   function remove() {
     host?.remove(); host = null; shadow = null; match = null;
   }
-  function escapeRegex(s: string): string {
-    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  }
-  function emojiScore(entry: EmojiEntry, q: string): number {
-    const name = entry.name.toLowerCase();
-    const slug = entry.slug.toLowerCase();
-    const qSlug = q.replace(/\s+/g, "_");
-    if (name === q || slug === qSlug) return 0;
-    if (name.startsWith(q) || slug.startsWith(qSlug)) return 1;
-    const wordBoundary = new RegExp(`\\b${escapeRegex(q)}`);
-    if (wordBoundary.test(name)) return 2;
-    if (slug.startsWith(qSlug + "_") || slug.includes("_" + qSlug)) return 3;
-    return 4;
-  }
   function searchEmoji(query: string): EmojiEntry[] {
     const q = query.toLowerCase().trim();
     if (!q) return emojiEntries.slice(0, 40);
-    return emojiEntries
-      .filter(e => e.slug.includes(q) || e.name.toLowerCase().includes(q))
-      .map(e => ({ e, score: emojiScore(e, q) }))
-      .sort((a, b) => a.score - b.score || a.e.name.length - b.e.name.length || a.e.name.localeCompare(b.e.name))
+    const qSlug = q.replace(/\s+/g, "_");
+    const scored: { entry: EmojiEntry; score: number }[] = [];
+    for (const item of searchIndex) {
+      const score = matchScore(item, q, qSlug);
+      if (score !== null) scored.push({ entry: item.entry, score });
+    }
+    return scored
+      .sort((a, b) => a.score - b.score || a.entry.name.length - b.entry.name.length || a.entry.name.localeCompare(b.entry.name))
       .slice(0, 40)
-      .map(x => x.e);
+      .map(x => x.entry);
   }
   function buildEmojiRows(box: HTMLDivElement, target: EditorTarget, results: EmojiEntry[]) {
     box.innerHTML = "";
