@@ -89,8 +89,6 @@
       gap: 6px;
     }
 
-    /* --- Header "Save" button: now a crisp white pill with proper
-       hover / active / saved feedback, matching the New Quip pill --- */
     .save-btn {
       display: inline-flex;
       align-items: center;
@@ -141,7 +139,6 @@
       background: #e9e9e9;
     }
 
-    /* Momentary confirmation flash, toggled via .save-btn.saved */
     .save-btn.saved {
       background: #dcfce7;
       color: #15803d;
@@ -521,7 +518,6 @@
       opacity: 0.7;
     }
 
-    /* Shared popover chrome for the settings + about popups */
     #settingspop,
     #infopop {
       position: absolute;
@@ -631,9 +627,6 @@
       margin: 0 -13px;
     }
 
-    /* --- "Save settings" button + its saved confirmation state ---
-       A short scale-pop plus a green glow that eases back to neutral,
-       instead of just a static color/text swap. */
     .sp-save {
       background: rgba(255, 255, 255, 0.08);
       border: 0.5px solid rgba(255, 255, 255, 0.12);
@@ -697,7 +690,6 @@
       }
     }
 
-    /* --- About / info popover content --- */
     .ip-content {
       display: flex;
       flex-direction: column;
@@ -850,9 +842,6 @@
 
   <script src="options.js"></script>
   <script>
-    // Wiring for the new "About" popover. Kept self-contained so it
-    // doesn't depend on / interfere with whatever options.js already
-    // does for the settings (gear) popover.
     (function () {
       const infobtn = document.getElementById('infobtn');
       const infopop = document.getElementById('infopop');

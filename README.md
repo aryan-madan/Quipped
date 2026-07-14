@@ -28,6 +28,15 @@ Unlike most extensions that look the same everywhere, and look quite different t
 
 ---
 
+## Installation (Chrome)
+1. Download the latest `dist.crx` from the Releases page.
+2. Open `chrome://extensions`.
+3. Enable **Developer mode**.
+4. Drag and drop `dist.crx` onto the Extensions page.
+5. Click **Add extension** if prompted.
+
+---
+
 ### AI Usage
 - css & styling
 - debugging
