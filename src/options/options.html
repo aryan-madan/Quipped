@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8" />
   <title>Quipped</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    html, body {
+    html,
+    body {
       width: 380px;
       height: 580px;
       background: #0a0a0c;
@@ -26,11 +32,11 @@
       height: 100%;
       background: #17171a;
       border-radius: 16px;
-      border: 0.5px solid rgba(255,255,255,0.07);
+      border: 0.5px solid rgba(255, 255, 255, 0.07);
       box-shadow:
-        0 0 0 0.5px rgba(0,0,0,0.6),
-        0 2px 8px rgba(0,0,0,0.5),
-        inset 0 1px 0 rgba(255,255,255,0.05);
+        0 0 0 0.5px rgba(0, 0, 0, 0.6),
+        0 2px 8px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -51,7 +57,7 @@
     .wordmark {
       font-size: 12.5px;
       font-weight: 650;
-      color: rgba(255,255,255,0.7);
+      color: rgba(255, 255, 255, 0.7);
       letter-spacing: -0.2px;
     }
 
@@ -62,9 +68,9 @@
     }
 
     .save-btn {
-      background: rgba(255,255,255,0.07);
-      border: 0.5px solid rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.55);
+      background: rgba(255, 255, 255, 0.07);
+      border: 0.5px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.55);
       font-size: 11px;
       font-weight: 600;
       font-family: inherit;
@@ -76,45 +82,65 @@
       pointer-events: none;
       outline: none;
     }
-    .save-btn.visible { opacity: 1; pointer-events: all; }
-    .save-btn:active { opacity: 0.5; }
+
+    .save-btn.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .save-btn:active {
+      opacity: 0.5;
+    }
 
     .gear-btn {
       background: none;
       border: none;
       outline: none;
-      color: rgba(255,255,255,0.2);
+      color: rgba(255, 255, 255, 0.2);
       cursor: pointer;
-      width: 26px; height: 26px;
+      width: 26px;
+      height: 26px;
       border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: color 0.15s, background 0.15s;
     }
-    .gear-btn:hover { color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.05); }
+
+    .gear-btn:hover {
+      color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.05);
+    }
 
     .list-wrap {
       flex: 1;
       overflow-y: auto;
       overflow-x: hidden;
     }
-    .list-wrap::-webkit-scrollbar { display: none; }
+
+    .list-wrap::-webkit-scrollbar {
+      display: none;
+    }
 
     .quip-row {
       display: flex;
       align-items: center;
       padding: 0 11px 0 13px;
       height: 48px;
-      border-bottom: 1px solid rgba(255,255,255,0.045);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.045);
       gap: 9px;
     }
-    .quip-row:first-child { border-top: 1px solid rgba(255,255,255,0.045); }
+
+    .quip-row:first-child {
+      border-top: 1px solid rgba(255, 255, 255, 0.045);
+    }
 
     .code-chip {
       font-family: ui-monospace, "SF Mono", Menlo, monospace;
       font-size: 10px;
       font-weight: 700;
-      color: rgba(255,255,255,0.45);
-      background: rgba(255,255,255,0.055);
+      color: rgba(255, 255, 255, 0.45);
+      background: rgba(255, 255, 255, 0.055);
       border: 0.5px solid transparent;
       border-radius: 4px;
       padding: 3px 7px;
@@ -125,10 +151,11 @@
       letter-spacing: 0.04em;
       transition: border-color 0.15s, color 0.15s, background 0.15s;
     }
+
     .code-chip:focus {
-      border-color: rgba(255,255,255,0.16);
-      background: rgba(255,255,255,0.09);
-      color: rgba(255,255,255,0.85);
+      border-color: rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.09);
+      color: rgba(255, 255, 255, 0.85);
     }
 
     .exp-input {
@@ -136,7 +163,7 @@
       min-width: 0;
       background: transparent;
       border: none;
-      color: rgba(255,255,255,0.78);
+      color: rgba(255, 255, 255, 0.78);
       font-size: 12.5px;
       font-family: inherit;
       outline: none;
@@ -146,22 +173,28 @@
       background: none;
       border: none;
       outline: none;
-      color: rgba(255,255,255,0.1);
+      color: rgba(255, 255, 255, 0.1);
       cursor: pointer;
-      width: 20px; height: 20px;
+      width: 20px;
+      height: 20px;
       border-radius: 4px;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
       transition: color 0.1s;
     }
-    .del-btn:hover { color: #f87171; }
+
+    .del-btn:hover {
+      color: #f87171;
+    }
 
     .empty {
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100%;
-      color: rgba(255,255,255,0.1);
+      color: rgba(255, 255, 255, 0.1);
       font-size: 12px;
     }
 
@@ -174,14 +207,16 @@
     }
 
     .tkey {
-      display: inline-flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.07);
-      border: 0.5px solid rgba(255,255,255,0.12);
-      box-shadow: 0 1px 0 rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.07);
+      border: 0.5px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.04);
       border-radius: 4px;
       padding: 2px 6px;
       font-size: 11px;
-      color: rgba(255,255,255,0.32);
+      color: rgba(255, 255, 255, 0.32);
       line-height: 1.4;
       font-family: -apple-system, system-ui, sans-serif;
     }
@@ -192,56 +227,78 @@
       gap: 7px;
       padding: 7px 12px;
       background: #ffffff;
-      border: 0.5px solid rgba(255,255,255,0.9);
+      border: 0.5px solid rgba(255, 255, 255, 0.9);
       box-shadow:
-        0 0 0 0.5px rgba(0,0,0,0.08),
-        0 4px 16px rgba(0,0,0,0.35),
-        0 1px 4px rgba(0,0,0,0.18),
-        inset 0 1px 0 rgba(255,255,255,1),
-        inset 0 -1px 0 rgba(0,0,0,0.06);
+        0 0 0 0.5px rgba(0, 0, 0, 0.08),
+        0 4px 16px rgba(0, 0, 0, 0.35),
+        0 1px 4px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.06);
       border-radius: 14px;
       cursor: pointer;
       user-select: none;
       outline: none;
       transition: box-shadow 0.14s, opacity 0.18s, background 0.14s;
     }
+
     #newpill:hover {
       background: #f5f5f5;
       box-shadow:
-        0 0 0 0.5px rgba(0,0,0,0.1),
-        0 6px 20px rgba(0,0,0,0.4),
-        0 1px 4px rgba(0,0,0,0.18),
-        inset 0 1px 0 rgba(255,255,255,1),
-        inset 0 -1px 0 rgba(0,0,0,0.08);
+        0 0 0 0.5px rgba(0, 0, 0, 0.1),
+        0 6px 20px rgba(0, 0, 0, 0.4),
+        0 1px 4px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.08);
     }
-    #newpill:active { opacity: 0.8; }
-    #newpill.hidden { opacity: 0; pointer-events: none; }
+
+    #newpill:active {
+      opacity: 0.8;
+    }
+
+    #newpill.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
 
     .tkey-light {
-      display: inline-flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.07);
-      border: 0.5px solid rgba(0,0,0,0.18);
-      box-shadow: 0 1.5px 0 rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.7);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.07);
+      border: 0.5px solid rgba(0, 0, 0, 0.18);
+      box-shadow: 0 1.5px 0 rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.7);
       border-radius: 4px;
       padding: 2px 6px;
       font-size: 11px;
-      color: rgba(0,0,0,0.52);
+      color: rgba(0, 0, 0, 0.52);
       line-height: 1.4;
       font-family: -apple-system, system-ui, sans-serif;
     }
 
-    .npill-icon { color: rgba(0,0,0,0.4); display: flex; align-items: center; }
-    .npill-text { font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.75); letter-spacing: -0.1px; }
+    .npill-icon {
+      color: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+    }
+
+    .npill-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.75);
+      letter-spacing: -0.1px;
+    }
 
     .npill-tkey {
-      display: inline-flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.07);
-      border: 0.5px solid rgba(0,0,0,0.18);
-      box-shadow: 0 1.5px 0 rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.7);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.07);
+      border: 0.5px solid rgba(0, 0, 0, 0.18);
+      box-shadow: 0 1.5px 0 rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.7);
       border-radius: 4px;
       padding: 2px 6px;
       font-size: 11px;
-      color: rgba(0,0,0,0.52);
+      color: rgba(0, 0, 0, 0.52);
       line-height: 1.4;
       font-family: -apple-system, system-ui, sans-serif;
     }
@@ -254,13 +311,13 @@
       transform-origin: bottom center;
       width: calc(100% - 28px);
       background: #ffffff;
-      border: 0.5px solid rgba(0,0,0,0.1);
+      border: 0.5px solid rgba(0, 0, 0, 0.1);
       box-shadow:
-        0 0 0 0.5px rgba(0,0,0,0.06),
-        0 -2px 32px rgba(0,0,0,0.12),
-        0 8px 28px rgba(0,0,0,0.18),
-        inset 0 1px 0 rgba(255,255,255,1),
-        inset 0 -1px 0 rgba(0,0,0,0.04);
+        0 0 0 0.5px rgba(0, 0, 0, 0.06),
+        0 -2px 32px rgba(0, 0, 0, 0.12),
+        0 8px 28px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.04);
       border-radius: 14px;
       padding: 12px 12px 10px;
       display: flex;
@@ -268,9 +325,10 @@
       gap: 7px;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.18s cubic-bezier(0.2,0.9,0.3,1), transform 0.18s cubic-bezier(0.2,0.9,0.3,1);
+      transition: opacity 0.18s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1);
       z-index: 20;
     }
+
     #newform.open {
       opacity: 1;
       pointer-events: all;
@@ -278,21 +336,25 @@
     }
 
     .nf-input {
-      background: rgba(0,0,0,0.04);
-      border: 0.5px solid rgba(0,0,0,0.09);
+      background: rgba(0, 0, 0, 0.04);
+      border: 0.5px solid rgba(0, 0, 0, 0.09);
       border-radius: 8px;
-      color: rgba(0,0,0,0.82);
+      color: rgba(0, 0, 0, 0.82);
       font-size: 12.5px;
       font-family: inherit;
       padding: 8px 11px;
       outline: none;
       transition: border-color 0.12s, background 0.12s;
     }
+
     .nf-input:focus {
-      border-color: rgba(0,0,0,0.18);
-      background: rgba(0,0,0,0.06);
+      border-color: rgba(0, 0, 0, 0.18);
+      background: rgba(0, 0, 0, 0.06);
     }
-    .nf-input::placeholder { color: rgba(0,0,0,0.22); }
+
+    .nf-input::placeholder {
+      color: rgba(0, 0, 0, 0.22);
+    }
 
     #nf-code {
       font-family: ui-monospace, "SF Mono", Menlo, monospace;
@@ -310,16 +372,19 @@
     .nf-hint {
       flex: 1;
       font-size: 11px;
-      color: rgba(0,0,0,0.38);
+      color: rgba(0, 0, 0, 0.38);
     }
 
-    .nf-actions { display: flex; gap: 5px; }
+    .nf-actions {
+      display: flex;
+      gap: 5px;
+    }
 
     .nf-cancel {
-      background: rgba(0,0,0,0.05);
-      border: 0.5px solid rgba(0,0,0,0.09);
+      background: rgba(0, 0, 0, 0.05);
+      border: 0.5px solid rgba(0, 0, 0, 0.09);
       border-radius: 7px;
-      color: rgba(0,0,0,0.4);
+      color: rgba(0, 0, 0, 0.4);
       font-size: 11.5px;
       font-weight: 600;
       font-family: inherit;
@@ -328,14 +393,17 @@
       outline: none;
       transition: background 0.1s;
     }
-    .nf-cancel:hover { background: rgba(0,0,0,0.08); }
+
+    .nf-cancel:hover {
+      background: rgba(0, 0, 0, 0.08);
+    }
 
     .nf-add {
-      background: rgba(0,0,0,0.82);
-      border: 0.5px solid rgba(0,0,0,0.9);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+      background: rgba(0, 0, 0, 0.82);
+      border: 0.5px solid rgba(0, 0, 0, 0.9);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
       border-radius: 7px;
-      color: rgba(255,255,255,0.92);
+      color: rgba(255, 255, 255, 0.92);
       font-size: 11.5px;
       font-weight: 650;
       font-family: inherit;
@@ -344,22 +412,28 @@
       outline: none;
       transition: background 0.1s;
     }
-    .nf-add:hover { background: rgba(0,0,0,0.92); }
-    .nf-add:active { opacity: 0.7; }
+
+    .nf-add:hover {
+      background: rgba(0, 0, 0, 0.92);
+    }
+
+    .nf-add:active {
+      opacity: 0.7;
+    }
 
     #settingspop {
       position: absolute;
       top: 42px;
       right: 12px;
       width: 230px;
-      background: rgba(32,32,36,0.99);
-      border: 0.5px solid rgba(255,255,255,0.1);
+      background: rgba(32, 32, 36, 0.99);
+      border: 0.5px solid rgba(255, 255, 255, 0.1);
       box-shadow:
-        0 0 0 0.5px rgba(255,255,255,0.06),
-        0 8px 32px rgba(0,0,0,0.55),
-        0 2px 8px rgba(0,0,0,0.3),
-        inset 0 1px 0 rgba(255,255,255,0.07),
-        inset 0 -1px 0 rgba(0,0,0,0.3);
+        0 0 0 0.5px rgba(255, 255, 255, 0.06),
+        0 8px 32px rgba(0, 0, 0, 0.55),
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3);
       border-radius: 14px;
       padding: 14px 13px 12px;
       display: flex;
@@ -369,9 +443,10 @@
       pointer-events: none;
       transform: scale(0.95) translateY(-4px);
       transform-origin: top right;
-      transition: opacity 0.16s cubic-bezier(0.2,0.9,0.3,1), transform 0.16s cubic-bezier(0.2,0.9,0.3,1);
+      transition: opacity 0.16s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.16s cubic-bezier(0.2, 0.9, 0.3, 1);
       z-index: 50;
     }
+
     #settingspop.open {
       opacity: 1;
       pointer-events: all;
@@ -381,38 +456,42 @@
     .sp-label {
       font-size: 10px;
       font-weight: 700;
-      color: rgba(255,255,255,0.25);
+      color: rgba(255, 255, 255, 0.25);
       letter-spacing: 0.07em;
       text-transform: uppercase;
     }
 
     .sp-desc {
       font-size: 11.5px;
-      color: rgba(255,255,255,0.5);
+      color: rgba(255, 255, 255, 0.5);
       margin-top: 1px;
     }
 
-    .sp-mods { display: flex; gap: 4px; }
+    .sp-mods {
+      display: flex;
+      gap: 4px;
+    }
 
     .sp-mod {
       flex: 1;
-      background: rgba(255,255,255,0.05);
-      border: 0.5px solid rgba(255,255,255,0.09);
+      background: rgba(255, 255, 255, 0.05);
+      border: 0.5px solid rgba(255, 255, 255, 0.09);
       border-radius: 7px;
       padding: 6px 4px;
       font-size: 11.5px;
       font-family: inherit;
-      color: rgba(255,255,255,0.35);
+      color: rgba(255, 255, 255, 0.35);
       cursor: pointer;
       text-align: center;
       outline: none;
       transition: background 0.1s, color 0.1s, border-color 0.1s;
     }
+
     .sp-mod.active {
-      background: rgba(255,255,255,0.11);
-      border-color: rgba(255,255,255,0.2);
-      color: rgba(255,255,255,0.88);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 0 rgba(0,0,0,0.4);
+      background: rgba(255, 255, 255, 0.11);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.88);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 0 rgba(0, 0, 0, 0.4);
     }
 
     .sp-preview {
@@ -420,29 +499,33 @@
       align-items: center;
       justify-content: space-between;
       padding: 8px 10px;
-      background: rgba(255,255,255,0.03);
-      border: 0.5px solid rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.03);
+      border: 0.5px solid rgba(255, 255, 255, 0.06);
       border-radius: 8px;
     }
 
     .sp-preview-label {
       font-size: 11px;
-      color: rgba(255,255,255,0.22);
+      color: rgba(255, 255, 255, 0.22);
     }
 
-    .sp-preview-keys { display: flex; align-items: center; gap: 3px; }
+    .sp-preview-keys {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
 
     .sp-divider {
       height: 0.5px;
-      background: rgba(255,255,255,0.07);
+      background: rgba(255, 255, 255, 0.07);
       margin: 0 -13px;
     }
 
     .sp-save {
-      background: rgba(255,255,255,0.08);
-      border: 0.5px solid rgba(255,255,255,0.12);
+      background: rgba(255, 255, 255, 0.08);
+      border: 0.5px solid rgba(255, 255, 255, 0.12);
       border-radius: 8px;
-      color: rgba(255,255,255,0.7);
+      color: rgba(255, 255, 255, 0.7);
       font-size: 12px;
       font-weight: 600;
       font-family: inherit;
@@ -451,8 +534,16 @@
       outline: none;
       transition: background 0.12s, color 0.12s;
     }
-    .sp-save:hover { background: rgba(255,255,255,0.12); }
-    .sp-save.saved { color: #4ade80; border-color: rgba(74,222,128,0.2); background: rgba(74,222,128,0.05); }
+
+    .sp-save:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .sp-save.saved {
+      color: #4ade80;
+      border-color: rgba(74, 222, 128, 0.2);
+      background: rgba(74, 222, 128, 0.05);
+    }
 
     #backdrop {
       position: absolute;
@@ -461,9 +552,13 @@
       display: none;
       border-radius: 16px;
     }
-    #backdrop.on { display: block; }
+
+    #backdrop.on {
+      display: block;
+    }
   </style>
 </head>
+
 <body>
   <div class="app">
     <div id="backdrop"></div>
@@ -474,12 +569,12 @@
         <button class="save-btn" id="savebtn">Save</button>
         <button class="gear-btn" id="gearbtn">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-            <rect x="1" y="3" width="14" height="2" rx="1" fill="currentColor"/>
-            <rect x="1" y="7" width="14" height="2" rx="1" fill="currentColor"/>
-            <rect x="1" y="11" width="14" height="2" rx="1" fill="currentColor"/>
-            <rect x="5" y="2" width="2" height="4" rx="1" fill="currentColor"/>
-            <rect x="9" y="6" width="2" height="4" rx="1" fill="currentColor"/>
-            <rect x="5" y="10" width="2" height="4" rx="1" fill="currentColor"/>
+            <rect x="1" y="3" width="14" height="2" rx="1" fill="currentColor" />
+            <rect x="1" y="7" width="14" height="2" rx="1" fill="currentColor" />
+            <rect x="1" y="11" width="14" height="2" rx="1" fill="currentColor" />
+            <rect x="5" y="2" width="2" height="4" rx="1" fill="currentColor" />
+            <rect x="9" y="6" width="2" height="4" rx="1" fill="currentColor" />
+            <rect x="5" y="10" width="2" height="4" rx="1" fill="currentColor" />
           </svg>
         </button>
       </div>
@@ -513,14 +608,10 @@
       <div id="newpill">
         <span class="npill-icon" style="padding:0 3px 0 0">
           <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-            <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
           </svg>
         </span>
         <span class="npill-text">New quip</span>
-        <span style="display:flex;gap:3px;margin-left:4px;">
-          <span class="npill-tkey" id="pillModKey">⌥</span>
-          <span class="npill-tkey">N</span>
-        </span>
       </div>
     </div>
 
@@ -539,4 +630,5 @@
 
   <script src="options.js"></script>
 </body>
+
 </html>
