@@ -1,11 +1,36 @@
 # Quipped
 
-Quipped is an extension that works on both Firefox and Chrome. It allows you to create Quips, where you can type !, followed by your quip title, and it replaces the text with your text, like shortcuts.
+**Quipped** is a lightweight text expansion extension for Chrome that blends seamlessly into every website you use.
 
-!n = name ykwim
+Instead of memorizing long snippets, create **Quips**, which are short triggers that instantly expand into longer text.
 
-It also has a global emoji bar.
+## Features
 
-The main feature is that it automatically styles itself after the site's it's on, so that it looks completely in tune with the site's styles and doesn't look out of place!
+### Quips
 
-Quipped's mascot is the cutest thing ever.
+Create your own text shortcuts or Quips using a `!` prefix.
+
+![How to create a Quip and use it](assets/create.gif)
+
+
+Whether it's emails, addresses, signatures, common responses, or email templates, Quips help you type less and say more.
+
+---
+
+## Global Emoji Bar
+
+Quickly search and insert emojis from anywhere on the web without leaving your keyboard.
+
+![How to insert emojis](assets/emoji.gif)
+
+---
+
+### Adaptive Styling
+
+Unlike most extensions that look the same everywhere, and look quite different than the website you're on, Quipped matches its border radius, font, spacing, and even colors to the site you're on, so the UI feels native instead of intrusive.
+
+![Examples](assets/examples.png)
+
+---
+
+Made with ❤️ by Ary

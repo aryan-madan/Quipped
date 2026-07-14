@@ -4,6 +4,7 @@ const MOD_SYMBOLS: Record<Modifier, string> = { alt: "⌥", ctrl: "⌃", shift: 
 const listEl = document.getElementById("list") as HTMLDivElement;
 const savebtn = document.getElementById("savebtn") as HTMLButtonElement;
 const gearbtn = document.getElementById("gearbtn") as HTMLButtonElement | null;
+const infobtn = document.getElementById("infobtn") as HTMLButtonElement | null;
 const backdrop = document.getElementById("backdrop") as HTMLDivElement;
 const newpill = document.getElementById("newpill") as HTMLDivElement;
 const newform = document.getElementById("newform") as HTMLDivElement;
@@ -15,6 +16,7 @@ const nfBold = document.getElementById("nf-bold") as HTMLButtonElement | null;
 const nfItalic = document.getElementById("nf-italic") as HTMLButtonElement | null;
 const nfUnderline = document.getElementById("nf-underline") as HTMLButtonElement | null;
 const settingspop = document.getElementById("settingspop") as HTMLDivElement | null;
+const infopop = document.getElementById("infopop") as HTMLDivElement | null;
 const spmodselect = document.getElementById("spmodselect") as HTMLDivElement | null;
 const sppreviewmod = document.getElementById("sppreviewmod") as HTMLSpanElement | null;
 const spsave = document.getElementById("spsave") as HTMLButtonElement | null;
@@ -146,12 +148,13 @@ function sizeChip(chip: HTMLInputElement) {
   chip.style.width = `${Math.max(32, span.offsetWidth + 16)}px`;
   document.body.removeChild(span);
 }
-type Pop = "none" | "new" | "settings";
+type Pop = "none" | "new" | "settings" | "info";
 let activePop: Pop = "none";
 function openPop(p: Pop) {
   newform.classList.remove("open");
   newpill.classList.remove("hidden");
   settingspop?.classList.remove("open");
+  infopop?.classList.remove("open");
   backdrop.classList.remove("on");
   if (p === "none" || p === activePop) { activePop = "none"; return; }
   activePop = p;
@@ -165,6 +168,9 @@ function openPop(p: Pop) {
     settingspop.classList.add("open");
     pendingModifier = modifier;
     selectPendingMod(modifier);
+  }
+  if (p === "info" && infopop) {
+    infopop.classList.add("open");
   }
 }
 function closePop() { openPop("none"); }
@@ -197,6 +203,10 @@ document.addEventListener("selectionchange", updateFormatButtons);
 gearbtn?.addEventListener("click", e => {
   e.stopPropagation();
   openPop(activePop === "settings" ? "none" : "settings");
+});
+infobtn?.addEventListener("click", e => {
+  e.stopPropagation();
+  openPop(activePop === "info" ? "none" : "info");
 });
 savebtn.addEventListener("click", save);
 spsave?.addEventListener("click", saveSettings);

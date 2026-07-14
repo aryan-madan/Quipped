@@ -89,29 +89,78 @@
       gap: 6px;
     }
 
+    /* --- Header "Save" button: now a crisp white pill with proper
+       hover / active / saved feedback, matching the New Quip pill --- */
     .save-btn {
-      background: rgba(255, 255, 255, 0.07);
-      border: 0.5px solid rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.55);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #ffffff;
+      border: 0.5px solid rgba(255, 255, 255, 0.9);
+      color: rgba(0, 0, 0, 0.78);
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 650;
       font-family: inherit;
+      letter-spacing: -0.05px;
       border-radius: 20px;
-      padding: 4px 11px;
+      padding: 5px 12px;
       cursor: pointer;
-      transition: opacity 0.15s;
-      opacity: 0;
-      pointer-events: none;
       outline: none;
+      opacity: 0;
+      transform: scale(0.92);
+      pointer-events: none;
+      box-shadow:
+        0 0 0 0.5px rgba(0, 0, 0, 0.08),
+        0 3px 10px rgba(0, 0, 0, 0.32),
+        0 1px 3px rgba(0, 0, 0, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+      transition:
+        opacity 0.16s cubic-bezier(0.2, 0.9, 0.3, 1),
+        transform 0.16s cubic-bezier(0.2, 0.9, 0.3, 1),
+        background 0.12s,
+        box-shadow 0.12s;
     }
 
     .save-btn.visible {
       opacity: 1;
+      transform: scale(1);
       pointer-events: all;
     }
 
+    .save-btn:hover {
+      background: #f3f3f3;
+      box-shadow:
+        0 0 0 0.5px rgba(0, 0, 0, 0.08),
+        0 4px 14px rgba(0, 0, 0, 0.38),
+        0 1px 3px rgba(0, 0, 0, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    }
+
     .save-btn:active {
-      opacity: 0.5;
+      transform: scale(0.94);
+      background: #e9e9e9;
+    }
+
+    /* Momentary confirmation flash, toggled via .save-btn.saved */
+    .save-btn.saved {
+      background: #dcfce7;
+      color: #15803d;
+      border-color: rgba(21, 128, 61, 0.25);
+      animation: saveFlash 1.1s ease forwards;
+    }
+
+    @keyframes saveFlash {
+      0% {
+        transform: scale(1.05);
+      }
+
+      30% {
+        transform: scale(1);
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
 
     .gear-btn {
@@ -472,10 +521,11 @@
       opacity: 0.7;
     }
 
-    #settingspop {
+    /* Shared popover chrome for the settings + about popups */
+    #settingspop,
+    #infopop {
       position: absolute;
       top: 42px;
-      right: 12px;
       width: 230px;
       background: rgba(32, 32, 36, 0.99);
       border: 0.5px solid rgba(255, 255, 255, 0.1);
@@ -498,7 +548,16 @@
       z-index: 50;
     }
 
-    #settingspop.open {
+    #settingspop {
+      right: 44px;
+    }
+
+    #infopop {
+      right: 12px;
+    }
+
+    #settingspop.open,
+    #infopop.open {
       opacity: 1;
       pointer-events: all;
       transform: scale(1) translateY(0);
@@ -572,6 +631,9 @@
       margin: 0 -13px;
     }
 
+    /* --- "Save settings" button + its saved confirmation state ---
+       A short scale-pop plus a green glow that eases back to neutral,
+       instead of just a static color/text swap. */
     .sp-save {
       background: rgba(255, 255, 255, 0.08);
       border: 0.5px solid rgba(255, 255, 255, 0.12);
@@ -583,17 +645,98 @@
       padding: 8px;
       cursor: pointer;
       outline: none;
-      transition: background 0.12s, color 0.12s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.12s, color 0.12s, border-color 0.12s;
     }
 
     .sp-save:hover {
       background: rgba(255, 255, 255, 0.12);
     }
 
+    .sp-save:active {
+      transform: scale(0.98);
+    }
+
     .sp-save.saved {
       color: #4ade80;
-      border-color: rgba(74, 222, 128, 0.2);
-      background: rgba(74, 222, 128, 0.05);
+      border-color: rgba(74, 222, 128, 0.28);
+      background: rgba(74, 222, 128, 0.1);
+      animation: savePop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), savedGlow 1.5s ease forwards;
+    }
+
+    @keyframes savePop {
+      0% {
+        transform: scale(1);
+      }
+
+      45% {
+        transform: scale(1.045);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes savedGlow {
+      0% {
+        box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4);
+        background: rgba(74, 222, 128, 0.18);
+      }
+
+      20% {
+        box-shadow: 0 0 0 5px rgba(74, 222, 128, 0.1);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+        background: rgba(74, 222, 128, 0.1);
+      }
+    }
+
+    /* --- About / info popover content --- */
+    .ip-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+      padding: 6px 2px 2px;
+    }
+
+    .ip-heart {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .ip-text {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+      line-height: 1.55;
+    }
+
+    .ip-link {
+      color: rgba(255, 255, 255, 0.92);
+      font-weight: 700;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+      transition: border-color 0.12s, color 0.12s;
+    }
+
+    .ip-link:hover {
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .ip-site {
+      display: block;
+      margin-top: 2px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.28);
+      letter-spacing: 0.02em;
     }
 
     #backdrop {
@@ -621,7 +764,7 @@
       </div>
       <div class="header-actions">
         <button class="save-btn" id="savebtn">Save</button>
-        <button class="gear-btn" id="gearbtn">
+        <button class="gear-btn" id="gearbtn" title="Settings">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
             <rect x="1" y="3" width="14" height="2" rx="1" fill="currentColor" />
             <rect x="1" y="7" width="14" height="2" rx="1" fill="currentColor" />
@@ -629,6 +772,13 @@
             <rect x="5" y="2" width="2" height="4" rx="1" fill="currentColor" />
             <rect x="9" y="6" width="2" height="4" rx="1" fill="currentColor" />
             <rect x="5" y="10" width="2" height="4" rx="1" fill="currentColor" />
+          </svg>
+        </button>
+        <button class="gear-btn" id="infobtn" title="About Quipped">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="6.4" stroke="currentColor" stroke-width="1.3" />
+            <rect x="7.25" y="6.8" width="1.5" height="4.6" rx="0.75" fill="currentColor" />
+            <rect x="7.25" y="4.1" width="1.5" height="1.5" rx="0.75" fill="currentColor" />
           </svg>
         </button>
       </div>
@@ -652,6 +802,18 @@
       </div>
       <div class="sp-divider"></div>
       <button class="sp-save" id="spsave">Save settings</button>
+    </div>
+
+    <div id="infopop">
+      <div class="ip-content">
+        <div class="ip-heart">❤️</div>
+        <div class="ip-text">
+          Made with ❤️ by<br />
+          <a class="ip-link" href="https://aryanmadan.xyz" target="_blank" rel="noopener noreferrer">Aryan
+            Madan</a>
+          <span class="ip-site">aryanmadan.xyz</span>
+        </div>
+      </div>
     </div>
 
     <div class="list-wrap">
@@ -687,6 +849,51 @@
   </div>
 
   <script src="options.js"></script>
+  <script>
+    // Wiring for the new "About" popover. Kept self-contained so it
+    // doesn't depend on / interfere with whatever options.js already
+    // does for the settings (gear) popover.
+    (function () {
+      const infobtn = document.getElementById('infobtn');
+      const infopop = document.getElementById('infopop');
+      const settingspop = document.getElementById('settingspop');
+      const backdrop = document.getElementById('backdrop');
+
+      if (!infobtn || !infopop || !backdrop) return;
+
+      function openInfo() {
+        if (settingspop) settingspop.classList.remove('open');
+        infopop.classList.add('open');
+        backdrop.classList.add('on');
+      }
+
+      function closeInfo() {
+        infopop.classList.remove('open');
+        if (!settingspop || !settingspop.classList.contains('open')) {
+          backdrop.classList.remove('on');
+        }
+      }
+
+      infobtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (infopop.classList.contains('open')) {
+          closeInfo();
+        } else {
+          openInfo();
+        }
+      });
+
+      backdrop.addEventListener('click', () => {
+        closeInfo();
+        if (settingspop) settingspop.classList.remove('open');
+        backdrop.classList.remove('on');
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeInfo();
+      });
+    })();
+  </script>
 </body>
 
 </html>
