@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Quipped",
   "version": "0.1.0",
-  "description": "Type shortcodes and expand them anywhere on the web.",
+  "description": "Type shortcodes and emojis anywhere on the web.",
   "permissions": [
     "storage"
   ],
