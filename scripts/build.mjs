@@ -1,34 +1,61 @@
 import { build } from "vite";
-import { resolve } from "path";
-import { cp, rm, mkdir } from "fs/promises";
+import { fileURLToPath } from "node:url";
+import { mkdirSync, cpSync, writeFileSync, readFileSync, rmSync } from "node:fs";
+import path from "node:path";
 
-const root = process.cwd();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(__dirname, "..");
+const tmpDir = path.join(root, "dist", ".bundle");
 
-async function bundle(name, entry) {
+async function bundleScript(entryRelPath, outFilename) {
   await build({
+    root,
+    logLevel: "warn",
     build: {
-      outDir: "dist",
+      outDir: tmpDir,
       emptyOutDir: false,
+      minify: false,
       rollupOptions: {
-        input: resolve(root, entry),
+        input: path.join(root, entryRelPath),
         output: {
           format: "iife",
-          entryFileNames: `${name}.js`,
+          entryFileNames: outFilename,
         },
       },
     },
   });
 }
 
-async function run() {
-  await rm("dist", { recursive: true, force: true });
-  await mkdir("dist");
-  await bundle("content", "src/content/content.ts");
-  await bundle("background", "src/background/background.ts");
-  await bundle("options", "src/options/options.ts");
-  await cp("manifest.json", "dist/manifest.json");
-  await cp("public/icons", "dist/icons", { recursive: true });
-  await cp("src/options/options.html", "dist/options.html");
+function mergeManifest(target) {
+  const base = JSON.parse(readFileSync(path.join(root, "manifest/manifest.base.json"), "utf8"));
+  const override = JSON.parse(readFileSync(path.join(root, `manifest/manifest.${target}.json`), "utf8"));
+  return { ...base, ...override };
 }
 
-run();
+function packageTarget(target) {
+  const outDir = path.join(root, "dist", target);
+  rmSync(outDir, { recursive: true, force: true });
+  mkdirSync(outDir, { recursive: true });
+
+  cpSync(path.join(tmpDir, "content.js"), path.join(outDir, "content.js"));
+  cpSync(path.join(tmpDir, "options.js"), path.join(outDir, "options.js"));
+  cpSync(path.join(root, "src/options/options.html"), path.join(outDir, "options.html"));
+  cpSync(path.join(root, "public/icons"), path.join(outDir, "icons"), { recursive: true });
+
+  const manifest = mergeManifest(target);
+  writeFileSync(path.join(outDir, "manifest.json"), JSON.stringify(manifest, null, 2));
+
+  console.log(`built dist/${target}`);
+}
+
+rmSync(tmpDir, { recursive: true, force: true });
+mkdirSync(tmpDir, { recursive: true });
+
+await bundleScript("src/content/content.ts", "content.js");
+await bundleScript("src/options/options.ts", "options.js");
+
+packageTarget("chrome");
+packageTarget("firefox");
+
+rmSync(tmpDir, { recursive: true, force: true });
+console.log("built: dist/chrome and dist/firefox");

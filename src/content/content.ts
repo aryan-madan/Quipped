@@ -1,8 +1,11 @@
 import browser from "webextension-polyfill";
 import emojiList from "./data/emoji.json";
+import { sanitizeExpansion } from "../shared/sanitize";
+
 type Modifier = "alt" | "ctrl" | "shift";
 type TextControl = HTMLInputElement | HTMLTextAreaElement;
 type EditorTarget = TextControl | HTMLElement;
+
 interface EmojiEntry {
   name: string;
   slug: string;
@@ -10,9 +13,12 @@ interface EmojiEntry {
   emoji_version: string;
   unicode_version: string;
   skin_tone_support: boolean;
+  aliases: string[];
   emoji: string;
 }
+
 type EmojiMeta = Omit<EmojiEntry, "emoji">;
+
 const emojiEntries: EmojiEntry[] = Object.entries(
   emojiList as unknown as Record<string, EmojiMeta>
 ).map(([emoji, meta]) => ({ ...meta, emoji }));
@@ -51,6 +57,7 @@ interface EmojiSearchEntry {
   entry: EmojiEntry;
   name: string;
   slug: string;
+  aliases: string[];
   tokens: string[];
   variants: string[];
 }
@@ -58,13 +65,14 @@ interface EmojiSearchEntry {
 const searchIndex: EmojiSearchEntry[] = emojiEntries.map((entry) => {
   const name = entry.name.toLowerCase();
   const slug = entry.slug.toLowerCase();
-  const tokens = Array.from(new Set([...tokenize(name), ...tokenize(slug)]));
+  const aliases = entry.aliases.map((a) => a.toLowerCase());
+  const tokens = Array.from(new Set([...tokenize(name), ...tokenize(slug), ...aliases]));
   const variants = Array.from(new Set(tokens.flatMap(wordVariants)));
-  return { entry, name, slug, tokens, variants };
+  return { entry, name, slug, aliases, tokens, variants };
 });
 
 function matchScore(item: EmojiSearchEntry, q: string, qSlug: string): number | null {
-  if (item.name === q || item.slug === qSlug) return 0;
+  if (item.name === q || item.slug === qSlug || item.aliases.includes(q)) return 0;
   if (item.name.startsWith(q) || item.slug.startsWith(qSlug)) return 1;
   for (const token of item.tokens) {
     if (token === q) return 1;
@@ -111,6 +119,7 @@ function initQuipCompanion() {
     if (changes.quips) map = changes.quips.newValue || {};
     if (changes.modifier) modifier = changes.modifier.newValue || "alt";
   });
+
   let host: HTMLDivElement | null = null;
   let shadow: ShadowRoot | null = null;
   let match: { code: string; expansion: string } | null = null;
@@ -122,11 +131,13 @@ function initQuipCompanion() {
   let emojiResults: EmojiEntry[] = [];
   let emojiRowEls: HTMLDivElement[] = [];
   let emojiIndex = 0;
+
   function parseRgb(str: string): [number, number, number, number] {
     const m = str.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/);
     if (!m) return [255, 255, 255, 1];
     return [parseFloat(m[1]), parseFloat(m[2]), parseFloat(m[3]), m[4] !== undefined ? parseFloat(m[4]) : 1];
   }
+
   function effectiveBgColor(target: HTMLElement): [number, number, number] {
     let el: HTMLElement | null = target;
     while (el) {
@@ -137,6 +148,7 @@ function initQuipCompanion() {
     const [r, g, b] = parseRgb(getComputedStyle(document.documentElement).backgroundColor);
     return [r, g, b];
   }
+
   function siteColors(target: HTMLElement) {
     const style = getComputedStyle(document.body);
     const font = style.fontFamily || "-apple-system, system-ui, sans-serif";
@@ -166,12 +178,20 @@ function initQuipCompanion() {
       rowSelected: dark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.08)",
     };
   }
+
   function modSymbol(): string {
     return modifier === "alt" ? "⌥" : modifier === "ctrl" ? "⌃" : "⇧";
   }
+
+  function keySpan(symbol: string): HTMLSpanElement {
+    const span = document.createElement("span");
+    span.className = "key";
+    span.textContent = symbol;
+    return span;
+  }
+
   function htmlToPlainText(html: string): string {
-    const tmp = document.createElement("div");
-    tmp.innerHTML = html;
+    const doc = new DOMParser().parseFromString(html, "text/html");
     const walk = (node: Node): string => {
       if (node.nodeType === Node.TEXT_NODE) return node.textContent || "";
       if (node.nodeType !== Node.ELEMENT_NODE) return "";
@@ -184,9 +204,10 @@ function initQuipCompanion() {
       return out;
     };
     let result = "";
-    tmp.childNodes.forEach(child => { result += walk(child); });
+    doc.body.childNodes.forEach(child => { result += walk(child); });
     return result.replace(/\n+$/, "");
   }
+
   function positionHost(target: EditorTarget, hostEl: HTMLDivElement, contentEl: HTMLElement) {
     const rect = getAnchorRect(target);
     const pw = contentEl.getBoundingClientRect().width || 220;
@@ -198,8 +219,10 @@ function initQuipCompanion() {
     hostEl.style.top = fitsAbove ? `${rect.top - ph - gap}px` : `${rect.bottom + gap}px`;
     hostEl.style.visibility = "visible";
   }
+
   function popover(target: EditorTarget, code: string, expansion: string) {
     remove();
+    const safeExpansion = sanitizeExpansion(expansion);
     host = document.createElement("div");
     host.style.cssText = "position:fixed;z-index:2147483647;visibility:hidden;pointer-events:none;";
     document.body.appendChild(host);
@@ -248,21 +271,24 @@ function initQuipCompanion() {
     pill.className = "pill";
     const text = document.createElement("span");
     text.className = "text";
-    text.textContent = htmlToPlainText(expansion).replace(/\n+/g, " ⏎ ");
+    text.textContent = htmlToPlainText(safeExpansion).replace(/\n+/g, " ⏎ ");
     const keys = document.createElement("span");
     keys.className = "keys";
-    keys.innerHTML = `<span class="key">${modSymbol()}</span><span class="key">&#8617;</span>`;
+    keys.appendChild(keySpan(modSymbol()));
+    keys.appendChild(keySpan("↩"));
     pill.appendChild(text);
     pill.appendChild(keys);
     shadow.appendChild(pill);
     requestAnimationFrame(() => {
       positionHost(target, host!, pill);
     });
-    match = { code, expansion };
+    match = { code, expansion: safeExpansion };
   }
+
   function remove() {
     host?.remove(); host = null; shadow = null; match = null;
   }
+
   function searchEmoji(query: string): EmojiEntry[] {
     const q = query.toLowerCase().trim();
     if (!q) return emojiEntries.slice(0, 40);
@@ -277,6 +303,7 @@ function initQuipCompanion() {
       .slice(0, 40)
       .map(x => x.entry);
   }
+
   function buildEmojiRows(box: HTMLDivElement, target: EditorTarget, results: EmojiEntry[]) {
     box.innerHTML = "";
     emojiRowEls = [];
@@ -300,6 +327,7 @@ function initQuipCompanion() {
       emojiRowEls.push(row);
     });
   }
+
   function emojiPalette(target: EditorTarget, code: string, query: string) {
     const results = searchEmoji(query);
     if (!results.length) { removeEmoji(); return; }
@@ -363,17 +391,20 @@ function initQuipCompanion() {
       positionHost(target, emojiHost!, box);
     });
   }
+
   function updateEmojiSelection() {
     emojiRowEls.forEach((row, idx) => {
       row.classList.toggle("selected", idx === emojiIndex);
       if (idx === emojiIndex) row.scrollIntoView({ block: "nearest" });
     });
   }
+
   function moveEmojiSelection(delta: number) {
     if (!emojiResults.length) return;
     emojiIndex = (emojiIndex + delta + emojiResults.length) % emojiResults.length;
     updateEmojiSelection();
   }
+
   function removeEmoji() {
     emojiHost?.remove();
     emojiHost = null;
@@ -385,6 +416,7 @@ function initQuipCompanion() {
     emojiRowEls = [];
     emojiIndex = 0;
   }
+
   function commitEmoji(target: EditorTarget) {
     if (!emojiCode || !emojiResults.length) return;
     const entry = emojiResults[emojiIndex];
@@ -392,6 +424,7 @@ function initQuipCompanion() {
     commit(target);
     removeEmoji();
   }
+
   function commit(target: EditorTarget) {
     if (!match || committing) return;
     const now = Date.now();
@@ -405,6 +438,7 @@ function initQuipCompanion() {
     }
     committing = false;
   }
+
   function commitTextControl(target: TextControl) {
     if (!match) return;
     const expansion = htmlToPlainText(match.expansion);
@@ -425,6 +459,7 @@ function initQuipCompanion() {
     target.dispatchEvent(new Event("input", { bubbles: true }));
     remove();
   }
+
   function commitContentEditable(target: HTMLElement) {
     if (!match) return;
     const before = textBeforeCaret(target);
@@ -469,9 +504,11 @@ function initQuipCompanion() {
 
     remove();
   }
+
   function isTextControl(el: EditorTarget): el is TextControl {
     return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
   }
+
   function editableFrom(el: HTMLElement | null): HTMLElement | null {
     if (!el) return null;
     const editable = el.closest<HTMLElement>("[contenteditable='true'], [contenteditable='plaintext-only']");
@@ -483,12 +520,14 @@ function initQuipCompanion() {
     }
     return null;
   }
+
   function field(e: Event): EditorTarget | null {
     const el = e.composedPath()[0] as HTMLElement | null;
     if (!el) return null;
     if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return el;
     return editableFrom(el);
   }
+
   function textBeforeCaret(target: HTMLElement): string {
     const selection = getSelection();
     if (!selection?.rangeCount) return "";
@@ -499,6 +538,7 @@ function initQuipCompanion() {
     before.setEnd(range.endContainer, range.endOffset);
     return before.toString();
   }
+
   function domPointAtTextOffset(root: HTMLElement, offset: number): { node: Text; offset: number } | null {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     let remaining = offset;
@@ -510,6 +550,7 @@ function initQuipCompanion() {
     }
     return null;
   }
+
   function getAnchorRect(target: EditorTarget): DOMRect {
     if (!isTextControl(target)) {
       const range = getSelection()?.rangeCount ? getSelection()!.getRangeAt(0).cloneRange() : null;
@@ -537,6 +578,7 @@ function initQuipCompanion() {
     const left = rect.left + (parseFloat(cs.paddingLeft) || 0) + textW;
     return new DOMRect(left, rect.top, 0, rect.height);
   }
+
   document.addEventListener("input", (e) => {
     if (committing) return;
     const target = field(e);
@@ -560,6 +602,7 @@ function initQuipCompanion() {
       removeEmoji();
     }
   }, true);
+
   document.addEventListener("keydown", (e) => {
     if (emojiCode) {
       if (e.key === "ArrowDown") { e.preventDefault(); moveEmojiSelection(1); return; }
@@ -588,5 +631,6 @@ function initQuipCompanion() {
     }
     if (e.key === "Escape") remove();
   }, true);
+
   document.addEventListener("scroll", () => { remove(); removeEmoji(); }, true);
 }

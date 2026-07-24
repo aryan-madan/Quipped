@@ -1,7 +1,7 @@
 {
   "name": "quipped",
   "version": "1.0.0",
-  "description": "",
+  "description": "Type shortcodes and emojis anywhere on the web.",
   "main": "index.js",
   "type": "commonjs",
   "license": "ISC",
@@ -9,9 +9,13 @@
   "keywords": [],
   "scripts": {
     "build": "node scripts/build.mjs",
-    "postinstall": "mkdir -p src/content/data && cp node_modules/unicode-emoji-json/data-by-emoji.json src/content/data/emoji-data.json"
+    "postinstall": "node scripts/merge.mjs",
+    "package:chrome": "cd dist/chrome && zip -r ../quipped-chrome.zip . -x '.*' && cd ../..",
+    "package:firefox": "cd dist/firefox && zip -r ../quipped-firefox.zip . -x '.*' && cd ../..",
+    "package": "npm run package:chrome && npm run package:firefox"
   },
   "dependencies": {
+    "emojilib": "^4.0.3",
     "unicode-emoji-json": "^0.9.0",
     "webextension-polyfill": "^0.12.0"
   },

@@ -1,6 +1,9 @@
 import browser from "webextension-polyfill";
+import { sanitizeExpansion } from "../shared/sanitize";
 type Modifier = "alt" | "ctrl" | "shift";
 const MOD_SYMBOLS: Record<Modifier, string> = { alt: "⌥", ctrl: "⌃", shift: "⇧" };
+const MOD_NAMES: Record<Modifier, string> = { alt: "Option", ctrl: "Control", shift: "Shift" };
+const MOD_ORDER: Modifier[] = ["alt", "ctrl", "shift"];
 const listEl = document.getElementById("list") as HTMLDivElement;
 const savebtn = document.getElementById("savebtn") as HTMLButtonElement;
 const gearbtn = document.getElementById("gearbtn") as HTMLButtonElement | null;
@@ -17,13 +20,35 @@ const nfItalic = document.getElementById("nf-italic") as HTMLButtonElement | nul
 const nfUnderline = document.getElementById("nf-underline") as HTMLButtonElement | null;
 const settingspop = document.getElementById("settingspop") as HTMLDivElement | null;
 const infopop = document.getElementById("infopop") as HTMLDivElement | null;
-const spmodselect = document.getElementById("spmodselect") as HTMLDivElement | null;
+const spmodcycle = document.getElementById("spmodcycle") as HTMLDivElement | null;
 const sppreviewmod = document.getElementById("sppreviewmod") as HTMLSpanElement | null;
-const spsave = document.getElementById("spsave") as HTMLButtonElement | null;
+const spmodname = document.getElementById("spmodname") as HTMLSpanElement | null;
 let quips: Record<string, string> = {};
 let dirty = false;
 let modifier: Modifier = "alt";
-let pendingModifier: Modifier = "alt";
+const ALLOWED_TAGS = new Set(["B", "STRONG", "I", "EM", "U", "BR"]);
+function safeHtmlToFragment(html: string): DocumentFragment {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const frag = document.createDocumentFragment();
+  const walk = (src: Node, dest: Node) => {
+    src.childNodes.forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        dest.appendChild(document.createTextNode(node.textContent || ""));
+      } else if (node.nodeType === Node.ELEMENT_NODE && ALLOWED_TAGS.has((node as Element).tagName)) {
+        const clean = document.createElement((node as Element).tagName);
+        walk(node, clean);
+        dest.appendChild(clean);
+      } else {
+        walk(node, dest);
+      }
+    });
+  };
+  walk(doc.body, frag);
+  return frag;
+}
+function setSafeHtml(el: HTMLElement, html: string) {
+  el.replaceChildren(safeHtmlToFragment(html));
+}
 function applyFormat(cmd: string) {
   document.execCommand(cmd, false);
   updateFormatButtons();
@@ -48,21 +73,16 @@ async function load() {
   const stored = await browser.storage.sync.get(["quips", "modifier"]);
   quips = (stored.quips as Record<string, string>) || { "!n": "Your Name Here", "!e": "you@example.com" };
   modifier = (stored.modifier as Modifier) || "alt";
-  pendingModifier = modifier;
 }
 async function save() {
-  await browser.storage.sync.set({ quips });
-  setDirty(false);
-}
-async function saveSettings() {
-  modifier = pendingModifier;
-  await browser.storage.sync.set({ modifier });
-  syncModifierUI();
-  if (spsave) {
-    spsave.textContent = "Saved ✓";
-    spsave.classList.add("saved");
-    setTimeout(() => { spsave.textContent = "Save settings"; spsave.classList.remove("saved"); }, 1500);
-  }
+  await browser.storage.sync.set({ quips, modifier });
+  savebtn.textContent = "Saved ✓";
+  savebtn.classList.add("saved");
+  setTimeout(() => {
+    savebtn.textContent = "Save";
+    savebtn.classList.remove("saved");
+    setDirty(false);
+  }, 900);
 }
 function setDirty(v: boolean) {
   dirty = v;
@@ -70,23 +90,16 @@ function setDirty(v: boolean) {
 }
 function syncModifierUI() {
   if (sppreviewmod) sppreviewmod.textContent = MOD_SYMBOLS[modifier];
-  if (spmodselect) {
-    spmodselect.querySelectorAll<HTMLButtonElement>(".sp-mod").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.mod === modifier);
-    });
-  }
+  if (spmodname) spmodname.textContent = MOD_NAMES[modifier];
 }
-function selectPendingMod(mod: Modifier) {
-  pendingModifier = mod;
-  if (spmodselect) {
-    spmodselect.querySelectorAll<HTMLButtonElement>(".sp-mod").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.mod === mod);
-    });
-  }
-  if (sppreviewmod) sppreviewmod.textContent = MOD_SYMBOLS[mod];
+function cycleModifier() {
+  const idx = MOD_ORDER.indexOf(modifier);
+  modifier = MOD_ORDER[(idx + 1) % MOD_ORDER.length];
+  syncModifierUI();
+  setDirty(true);
 }
 function render() {
-  listEl.innerHTML = "";
+  listEl.replaceChildren();
   const codes = Object.keys(quips).sort();
   if (!codes.length) {
     const empty = document.createElement("div");
@@ -132,8 +145,8 @@ function render() {
     expDiv.className = "exp-input";
     expDiv.contentEditable = "true";
     expDiv.dataset.placeholder = "Expansion text";
-    expDiv.innerHTML = quips[code];
-    expDiv.addEventListener("input", () => { quips[code] = expDiv.innerHTML; setDirty(true); });
+    setSafeHtml(expDiv, sanitizeExpansion(quips[code]));
+    expDiv.addEventListener("input", () => { quips[code] = sanitizeExpansion(expDiv.innerHTML); setDirty(true); });
     expDiv.addEventListener("keydown", e => handleFormatKeys(e));
     row.appendChild(top);
     row.appendChild(expDiv);
@@ -166,8 +179,6 @@ function openPop(p: Pop) {
   }
   if (p === "settings" && settingspop) {
     settingspop.classList.add("open");
-    pendingModifier = modifier;
-    selectPendingMod(modifier);
   }
   if (p === "info" && infopop) {
     infopop.classList.add("open");
@@ -180,13 +191,13 @@ nfCancel.addEventListener("click", closePop);
 function addQuip() {
   const code = nfCode.value.trim();
   const expText = nfExp.innerText.trim();
-  const expHtml = nfExp.innerHTML.trim();
+  const expHtml = sanitizeExpansion(nfExp.innerHTML.trim());
   if (!code || !expText || !code.startsWith("!")) return;
   quips[code] = expHtml;
   setDirty(true);
   render();
   nfCode.value = "";
-  nfExp.innerHTML = "";
+  nfExp.replaceChildren();
   closePop();
 }
 nfAdd.addEventListener("click", addQuip);
@@ -209,9 +220,9 @@ infobtn?.addEventListener("click", e => {
   openPop(activePop === "info" ? "none" : "info");
 });
 savebtn.addEventListener("click", save);
-spsave?.addEventListener("click", saveSettings);
-spmodselect?.querySelectorAll<HTMLButtonElement>(".sp-mod").forEach(btn => {
-  btn.addEventListener("click", () => selectPendingMod(btn.dataset.mod as Modifier));
+spmodcycle?.addEventListener("click", cycleModifier);
+spmodcycle?.addEventListener("keydown", e => {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cycleModifier(); }
 });
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") closePop();
