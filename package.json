@@ -1,6 +1,6 @@
 {
   "name": "quipped",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "description": "Type shortcodes and emojis anywhere on the web.",
   "main": "index.js",
   "type": "commonjs",
