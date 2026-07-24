@@ -1,0 +1,20 @@
+<svg width="120" height="123" viewBox="0 0 120 123" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_d_1959_90)">
+<rect width="120" height="114" rx="30" fill="#303030"/>
+<rect x="2" y="2" width="116" height="110" rx="28" stroke="#585858" stroke-width="4"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M85 56.3348C84.192 62.4257 81.7262 67.6937 77.8712 71.5816L84.4646 76.8213L80.3298 82L72.3444 75.7106C68.8035 77.5789 64.6214 78.5688 60 78.5688C52.2311 78.5687 45.8892 75.7231 41.4949 70.9248C37.9949 67.1029 35.7611 62.0751 35 56.3348H42.9712C43.5746 60.1587 44.9664 63.4708 47.0888 66.0156C49.9915 69.4961 54.305 71.6084 60 71.6085C62.2236 71.6085 64.2515 71.2933 66.0508 70.7064L61.9974 67.4624L61.4335 67.0099L61.8832 66.4454L65.5682 61.8298L72.0188 66.9702C74.6179 64.3164 76.3342 60.6554 77.0274 56.3348H85ZM61.5491 72.2837L62.0517 72.2454C62.1334 72.238 62.2147 72.2283 62.2958 72.2199C62.0495 72.245 61.8006 72.2669 61.5491 72.2837Z" fill="white"/>
+<path d="M50.0585 41.8099C50.0585 45.0187 47.4403 47.6199 44.2105 47.6199C40.9806 47.6199 38.3624 45.0187 38.3624 41.8099C38.3624 38.6012 40.9806 36 44.2105 36C47.4403 36 50.0585 38.6012 50.0585 41.8099Z" fill="white"/>
+<path d="M80.761 41.8099C80.761 45.0187 78.1427 47.6199 74.9129 47.6199C71.6831 47.6199 69.0648 45.0187 69.0648 41.8099C69.0648 38.6012 71.6831 36 74.9129 36C78.1427 36 80.761 38.6012 80.761 41.8099Z" fill="white"/>
+</g>
+<defs>
+<filter id="filter0_d_1959_90" x="0" y="0" width="120" height="123" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="9"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.0941176 0 0 0 0 0.0941176 0 0 0 0 0.0941176 0 0 0 1 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1959_90"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1959_90" result="shape"/>
+</filter>
+</defs>
+</svg>
